@@ -1,0 +1,61 @@
+[tool.poetry]
+name = "poetry-up"
+version = "0.1.0"
+description = "Poetry Up"
+authors = ["Claudio Jolowicz <mail@claudiojolowicz.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/cjolowicz/poetry-up"
+repository = "https://github.com/cjolowicz/poetry-up"
+documentation = "https://poetry-up.readthedocs.io"
+
+[tool.poetry.urls]
+Changelog = "https://github.com/cjolowicz/poetry-up/releases"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+click = "^7.0"
+importlib-metadata = {version = "^1.5.0", python = "<3.8"}
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.3.2"
+coverage = {extras = ["toml"], version = "^5.0.1"}
+pytest-cov = "^2.8.1"
+flake8 = "^3.7.9"
+black = "^19.10b0"
+flake8-black = "^0.1.1"
+flake8-import-order = "^0.18.1"
+flake8-bugbear = "^20.1.2"
+flake8-bandit = "^2.1.2"
+safety = "^1.8.5"
+mypy = "^0.770"
+pytype = {version = "^2020.2.20", python = ">=3.6,<3.8"}
+flake8-annotations = "^2.0.0"
+typeguard = "^2.7.1"
+flake8-docstrings = "^1.5.0"
+darglint = "^1.1.2"
+xdoctest = "^0.11.0"
+sphinx = "^2.3.1"
+sphinx-autodoc-typehints = "^1.10.3"
+recommonmark = "^0.6.0"
+pep8-naming = "^0.9.1"
+flake8-rst-docstrings = "^0.0.13"
+
+[tool.poetry.scripts]
+poetry-up = "poetry_up.console:main"
+
+[tool.coverage.paths]
+source = ["src", "*/site-packages"]
+
+[tool.coverage.run]
+branch = true
+source = ["poetry_up"]
+omit = ["*/poetry_up/__main__.py"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 100
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
