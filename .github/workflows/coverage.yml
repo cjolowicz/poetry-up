@@ -9,6 +9,9 @@ jobs:
         with:
           python-version: "3.8"
           architecture: x64
+      - run: |
+          git config --global user.email "you@example.com"
+          git config --global user.name "Your Name"
       - run: pip install nox==2019.11.9
       - run: pip install poetry==1.0.5
       - run: nox --sessions tests-3.8 coverage

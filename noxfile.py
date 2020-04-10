@@ -10,7 +10,7 @@ from nox.sessions import Session
 
 
 package = "poetry_up"
-python_versions = ["3.8", "3.7", "3.6"]
+python_versions = ["3.8", "3.7"]
 nox.options.sessions = "lint", "safety", "mypy", "pytype", "tests"
 locations = "src", "tests", "noxfile.py", "docs/conf.py"
 
@@ -153,7 +153,7 @@ def mypy(session: Session) -> None:
     session.run("mypy", *args)
 
 
-@nox.session(python=["3.7", "3.6"])
+@nox.session(python=["3.7"])
 def pytype(session: Session) -> None:
     """Type-check using pytype."""
     args = session.posargs or ["--disable=import-error", *locations]
@@ -164,9 +164,11 @@ def pytype(session: Session) -> None:
 @nox.session(python=python_versions)
 def tests(session: Session) -> None:
     """Run the test suite."""
-    args = session.posargs or ["--cov"]
+    args = session.posargs or ["--cov", "--cov-config=pyproject.toml"]
     install_package(session)
-    install(session, "coverage[toml]", "pytest", "pytest-cov")
+    install(
+        session, "coverage[toml]", "pretend", "pytest", "pytest-cov", "pytest-datadir"
+    )
     session.run("pytest", *args)
 
 
