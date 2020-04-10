@@ -32,3 +32,10 @@ poetry_up.poetry
 
 .. automodule:: poetry_up.poetry
    :members:
+
+
+poetry_up.update
+----------------
+
+.. automodule:: poetry_up.update
+   :members:

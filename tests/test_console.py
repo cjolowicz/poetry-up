@@ -134,9 +134,6 @@ def test_main_removes_branch_on_refused_upgrade(
     repository: Path,
     stub_poetry_show_outdated: None,
     stub_poetry_update_noop: None,
-    stub_git_push: None,
-    stub_pull_request_exists: None,
-    stub_create_pull_request: None,
 ) -> None:
     """It removes the branch if the upgrade was refused."""
     runner.invoke(console.main)

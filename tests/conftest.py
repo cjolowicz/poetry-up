@@ -7,6 +7,8 @@ from typing import Iterator
 
 import pytest
 
+from poetry_up import poetry
+
 
 @contextlib.contextmanager
 def working_directory(directory: Path) -> Iterator[None]:
@@ -44,3 +46,9 @@ def repository(shared_datadir: Path, tmp_path: Path) -> Iterator[Path]:
     )
     with working_directory(local_repository):
         yield local_repository
+
+
+@pytest.fixture
+def package() -> poetry.Package:
+    """Package to be upgraded."""
+    return poetry.Package("marshmallow", "3.0.0", "3.5.1")

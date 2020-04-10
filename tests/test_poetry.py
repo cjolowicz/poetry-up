@@ -8,7 +8,6 @@ import pytest
 from poetry_up import poetry
 
 
-package = poetry.Package("marshmallow", "3.0.0", "3.5.1")
 description = (
     "A lightweight library for converting complex datatypes"
     " to and from native Python datatypes."
@@ -16,7 +15,9 @@ description = (
 )
 
 
-def test_show_outdated_matches_valid_output(monkeypatch: MonkeyPatch) -> None:
+def test_show_outdated_matches_valid_output(
+    monkeypatch: MonkeyPatch, package: poetry.Package
+) -> None:
     """It matches valid output."""
 
     def stub(*args: Any, **kwargs: Any) -> Any:
