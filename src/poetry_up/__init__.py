@@ -1,8 +1,5 @@
-"""Poetry Up."""
-try:
-    from importlib.metadata import version, PackageNotFoundError  # type: ignore
-except ImportError:  # pragma: no cover
-    from importlib_metadata import version, PackageNotFoundError  # type: ignore
+"""Upgrade dependencies using Poetry."""
+from importlib.metadata import PackageNotFoundError, version
 
 
 try:

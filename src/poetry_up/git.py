@@ -9,7 +9,8 @@ def current_branch() -> str:
     process = subprocess.run(  # noqa: S603, S607
         ["git", "rev-parse", "--abbrev-ref", "HEAD"],
         check=True,
-        capture_output=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         text=True,
     )
     return process.stdout.strip()
@@ -55,7 +56,8 @@ def resolve_branch(branch: str) -> str:
     process = subprocess.run(  # noqa: S603, S607
         ["git", "rev-parse", f"refs/heads/{branch}"],
         check=True,
-        capture_output=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         text=True,
     )
     return process.stdout.strip()

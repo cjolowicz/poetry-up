@@ -5,7 +5,11 @@ import subprocess  # noqa: S404
 def pull_request_exists(branch: str) -> bool:
     """Return True if a pull request exists for the given branch."""
     process = subprocess.run(  # noqa: S603, S607
-        ["gh", "pr", "list"], check=True, capture_output=True, text=True
+        ["gh", "pr", "list"],
+        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
     )
     return branch in process.stdout
 

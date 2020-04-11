@@ -31,8 +31,8 @@ def stub_poetry_update(
 ) -> None:
     """Stub for poetry.update."""
 
-    def stub(package: str, lock: bool = False) -> None:
-        if package == "marshmallow":
+    def stub(package: poetry.Package, lock: bool = False) -> None:
+        if package.name == "marshmallow":
             source = shared_datadir / "poetry.lock.new"
             destination = Path("poetry.lock")
             destination.write_text(source.read_text())
