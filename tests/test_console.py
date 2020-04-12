@@ -73,68 +73,74 @@ def stub_create_pull_request(monkeypatch: MonkeyPatch) -> None:
     monkeypatch.setattr("poetry_up.github.create_pull_request", lambda *args: None)
 
 
-def test_main_succeeds_with_dry_run(runner: CliRunner, repository: Path) -> None:
-    """It exits with a status code of zero when passed --dry-run."""
-    result = runner.invoke(console.main, ["--dry-run"])
-    assert result.exit_code == 0
+class TestMain:
+    """Tests for main."""
 
+    def test_it_succeeds_with_dry_run(
+        self, runner: CliRunner, repository: Path
+    ) -> None:
+        """It exits with a status code of zero when passed --dry-run."""
+        result = runner.invoke(console.main, ["--dry-run"])
+        assert result.exit_code == 0
 
-@pytest.mark.parametrize(
-    "options",
-    [
-        [],
-        ["--cwd=."],
-        ["--no-install"],
-        ["--no-commit"],
-        ["--push"],
-        ["--push", "--pull-request"],
-        ["--push", "--merge-request"],
-        ["marshmallow"],
-        ["another-package"],
-    ],
-)
-def test_main_succeeds(
-    runner: CliRunner,
-    repository: Path,
-    options: List[str],
-    stub_poetry_show_outdated: None,
-    stub_poetry_update: None,
-    stub_git_push: None,
-    stub_pull_request_exists: None,
-    stub_create_pull_request: None,
-) -> None:
-    """It exits with a status code of zero."""
-    result = runner.invoke(console.main, options)
-    assert result.exit_code == 0
+    @pytest.mark.parametrize(
+        "options",
+        [
+            [],
+            ["--cwd=."],
+            ["--no-install"],
+            ["--no-commit"],
+            ["--push"],
+            ["--push", "--pull-request"],
+            ["--push", "--merge-request"],
+            ["marshmallow"],
+            ["another-package"],
+        ],
+    )
+    def test_it_succeeds(
+        self,
+        runner: CliRunner,
+        repository: Path,
+        options: List[str],
+        stub_poetry_show_outdated: None,
+        stub_poetry_update: None,
+        stub_git_push: None,
+        stub_pull_request_exists: None,
+        stub_create_pull_request: None,
+    ) -> None:
+        """It exits with a status code of zero."""
+        result = runner.invoke(console.main, options)
+        assert result.exit_code == 0
 
+    def test_it_fails_on_dirty_worktree(
+        self, runner: CliRunner, repository: Path
+    ) -> None:
+        """It fails if the working tree is not clean."""
+        pyproject_toml = Path("pyproject.toml")
+        with pyproject_toml.open(mode="a") as io:
+            io.write("\n")
 
-def test_main_fails_on_dirty_worktree(runner: CliRunner, repository: Path) -> None:
-    """It fails if the working tree is not clean."""
-    pyproject_toml = Path("pyproject.toml")
-    with pyproject_toml.open(mode="a") as io:
-        io.write("\n")
+        result = runner.invoke(console.main)
+        assert result.exit_code == 1
 
-    result = runner.invoke(console.main)
-    assert result.exit_code == 1
+    def test_it_creates_branch(
+        self,
+        runner: CliRunner,
+        repository: Path,
+        stub_poetry_show_outdated: None,
+        stub_poetry_update: None,
+    ) -> None:
+        """It creates a branch for the upgrade."""
+        runner.invoke(console.main)
+        assert git.branch_exists("poetry-up/marshmallow-3.5.1")
 
-
-def test_main_creates_branch(
-    runner: CliRunner,
-    repository: Path,
-    stub_poetry_show_outdated: None,
-    stub_poetry_update: None,
-) -> None:
-    """It creates a branch for the upgrade."""
-    runner.invoke(console.main)
-    assert git.branch_exists("poetry-up/marshmallow-3.5.1")
-
-
-def test_main_removes_branch_on_refused_upgrade(
-    runner: CliRunner,
-    repository: Path,
-    stub_poetry_show_outdated: None,
-    stub_poetry_update_noop: None,
-) -> None:
-    """It removes the branch if the upgrade was refused."""
-    runner.invoke(console.main)
-    assert not git.branch_exists("poetry-up/marshmallow-3.5.1")
+    def test_it_removes_branch_on_refused_upgrade(
+        self,
+        runner: CliRunner,
+        repository: Path,
+        stub_poetry_show_outdated: None,
+        stub_poetry_update_noop: None,
+    ) -> None:
+        """It removes the branch if the upgrade was refused."""
+        runner.invoke(console.main)
+        assert not git.branch_exists("poetry-up/marshmallow-3.5.1")
