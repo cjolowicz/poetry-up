@@ -2,32 +2,31 @@
 from pathlib import Path
 
 from _pytest.monkeypatch import MonkeyPatch
-from poetry.factory import Factory
 from poetry.packages import Package
-from poetry.poetry import Poetry
 from poetry.puzzle.provider import Provider
 import pretend
 import pytest
 import tomlkit
 
-from poetry_up import poetry
+from poetry_up.poetry import Package as PackageUpdate
+from poetry_up.poetry import Poetry, update_constraint, update_pyproject_toml
 
 
 class TestSearchForPackageWithProvider:
-    """Tests for search_for_package_with_provider."""
+    """Tests for Poetry._search_for_package_with_provider."""
 
     @pytest.mark.parametrize("source_type", ["vcs", "file", "directory"])
     def test_it_succeeds(
         self, monkeypatch: MonkeyPatch, repository: Path, source_type: str
     ) -> None:
         """It searches for the package using Provider."""
-        poetry_instance = Factory().create_poetry(Path.cwd())
-        locked_repository = poetry_instance.locker.locked_repository()
+        poetry = Poetry()
+        locked_repository = poetry._poetry.locker.locked_repository()
         for package in locked_repository.packages:
             if package.name == "marshmallow":
                 break
 
-        for requirement in poetry_instance.package.requires:
+        for requirement in poetry._poetry.package.requires:
             if requirement.name == "marshmallow":
                 monkeypatch.setattr(requirement, f"is_{source_type}", lambda: True)
 
@@ -35,58 +34,59 @@ class TestSearchForPackageWithProvider:
             Provider, f"search_for_{source_type}", lambda self, requirement: [package]
         )
 
-        result = poetry.search_for_package_with_provider(poetry_instance, package)
+        result = poetry.search_for_package_with_provider(package)
         assert result is package
 
     def test_it_raises_if_package_not_found(self, repository: Path) -> None:
         """It raises an exception if the package was not found."""
-        poetry_instance = Factory().create_poetry(Path.cwd())
+        poetry = Poetry()
         package = pretend.stub(name="no-such-package")
 
         with pytest.raises(ValueError):
-            poetry.search_for_package_with_provider(poetry_instance, package)
+            poetry._search_for_package_with_provider(package)
 
     def test_it_raises_if_requirement_not_applicable(self, repository: Path) -> None:
         """It raises an exception if the package was not found."""
-        poetry_instance = Factory().create_poetry(Path.cwd())
-        locked_repository = poetry_instance.locker.locked_repository()
+        poetry = Poetry()
+        locked_repository = poetry._poetry.locker.locked_repository()
         for package in locked_repository.packages:
             if package.name == "marshmallow":
                 break
 
         with pytest.raises(ValueError):
-            poetry.search_for_package_with_provider(poetry_instance, package)
+            poetry._search_for_package_with_provider(package)
 
 
 class TestFindLatestPackage:
-    """Tests for find_latest_package."""
+    """Tests for Poetry._find_latest_package."""
 
     @pytest.mark.parametrize("source_type", ["git", "file", "directory"])
     def test_it_uses_provider(
         self, monkeypatch: MonkeyPatch, repository: Path, source_type: str
     ) -> None:
         """It uses Provider if applicable."""
-        poetry_instance = Factory().create_poetry(Path.cwd())
-        stub = pretend.call_recorder(lambda poetry, package: package)
-        monkeypatch.setattr("poetry_up.poetry.search_for_package_with_provider", stub)
+        poetry = Poetry()
+        stub = pretend.call_recorder(lambda self, package: package)
+        monkeypatch.setattr(poetry, "_search_for_package_with_provider", stub)
         package = pretend.stub(source_type=source_type)
-        poetry.find_latest_package(poetry_instance, package)
+        poetry._find_latest_package(package)
 
         assert stub.calls
 
 
 class TestShowOutdated:
-    """Tests for show_outdated."""
+    """Tests for Poetry.show_outdated."""
 
     def test_it_skips_up_to_date_packages(
         self, monkeypatch: MonkeyPatch, repository: Path
     ) -> None:
         """It skips up-to-date packages."""
 
-        def stub(poetry: Poetry, package: Package) -> Package:
+        def stub(self: Poetry, package: Package) -> Package:
             return package
 
-        monkeypatch.setattr("poetry_up.poetry.find_latest_package", stub)
+        poetry = Poetry()
+        monkeypatch.setattr(poetry, "_find_latest_package", stub)
         assert not list(poetry.show_outdated())
 
 
@@ -94,7 +94,7 @@ class TestUpdateConstraint:
     """Tests for update_constraint."""
 
     def test_it_updates_version_key(
-        self, repository: Path, package: poetry.Package
+        self, repository: Path, package: PackageUpdate
     ) -> None:
         """It updates ``version`` keys in the dependencies table."""
         config = Path("pyproject.toml")
@@ -106,7 +106,7 @@ class TestUpdateConstraint:
         dependencies = document["tool"]["poetry"]["dependencies"]
         dependencies["marshmallow"] = {"version": dependencies["marshmallow"]}
 
-        poetry.update_constraint(package, dependencies)
+        update_constraint(package, dependencies)
 
         assert dependencies["marshmallow"]["version"] == f"^{package.new_version}"
 
@@ -115,10 +115,10 @@ class TestUpdatePyProjectTOML:
     """Tests for update_pyproject_toml."""
 
     def test_it_updates_version_constraints(
-        self, repository: Path, package: poetry.Package
+        self, repository: Path, package: PackageUpdate
     ) -> None:
         """It updates version constraints in pyproject.toml."""
-        poetry.update_pyproject_toml(package)
+        update_pyproject_toml(package)
 
         config = Path("pyproject.toml")
         with config.open() as io:
@@ -137,7 +137,7 @@ class TestUpdate:
         self,
         monkeypatch: MonkeyPatch,
         repository: Path,
-        package: poetry.Package,
+        package: PackageUpdate,
         compatible: bool,
     ) -> None:
         """It invokes Installer.run."""
@@ -145,6 +145,7 @@ class TestUpdate:
         monkeypatch.setattr("poetry.installation.installer.Installer.run", stub)
 
         package.compatible = compatible
+        poetry = Poetry()
         poetry.update(package)
 
         assert stub.calls

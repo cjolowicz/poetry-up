@@ -67,7 +67,9 @@ class Update(Action):
 
     def __call__(self) -> None:
         """Run the action."""
-        poetry.update(self.updater.package, lock=not self.updater.options.install)
+        self.updater.poetry.update(
+            self.updater.package, lock=not self.updater.options.install
+        )
 
 
 class Commit(Action):
@@ -173,9 +175,14 @@ class PackageUpdater:
     """Update a package."""
 
     def __init__(
-        self, package: poetry.Package, options: Options, original_branch: str
+        self,
+        poetry: poetry.Poetry,
+        package: poetry.Package,
+        options: Options,
+        original_branch: str,
     ) -> None:
         """Constructor."""
+        self.poetry = poetry
         self.package = package
         self.options = options
         self.original_branch = original_branch
@@ -232,6 +239,7 @@ class Updater:
 
     def __init__(self, options: Options) -> None:
         """Constructor."""
+        self.poetry = poetry.Poetry()
         self.options = options
 
     def run(self) -> None:
@@ -241,8 +249,10 @@ class Updater:
 
         original_branch = git.current_branch()
 
-        for package in poetry.show_outdated():
-            updater = PackageUpdater(package, self.options, original_branch)
+        for package in self.poetry.show_outdated():
+            updater = PackageUpdater(
+                self.poetry, package, self.options, original_branch
+            )
             if updater.required:
                 updater.show()
                 if not self.options.dry_run:
