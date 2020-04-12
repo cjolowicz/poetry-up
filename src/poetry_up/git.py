@@ -41,14 +41,16 @@ def switch(branch: str, create: bool = False, location: str = None) -> None:
     """
     if create and location is not None:
         subprocess.run(  # noqa: S603, S607
-            ["git", "switch", "--create", branch, location], check=True
+            ["git", "switch", "--quiet", "--create", branch, location], check=True
         )
     elif create:
         subprocess.run(  # noqa: S603, S607
-            ["git", "switch", "--create", branch], check=True
+            ["git", "switch", "--quiet", "--create", branch], check=True
         )
     else:
-        subprocess.run(["git", "switch", branch], check=True)  # noqa: S603, S607
+        subprocess.run(  # noqa: S603, S607
+            ["git", "switch", "--quiet", branch], check=True
+        )
 
 
 def resolve_branch(branch: str) -> str:
@@ -66,7 +68,7 @@ def resolve_branch(branch: str) -> str:
 def remove_branch(branch: str) -> None:
     """Remove the specified branch."""
     subprocess.run(  # noqa: S603, S607
-        ["git", "branch", "--delete", branch], check=True
+        ["git", "branch", "--quiet", "--delete", branch], check=True
     )
 
 
@@ -78,7 +80,7 @@ def add(paths: Iterable[str]) -> None:
 def commit(message: str) -> None:
     """Create a commit using the given message."""
     subprocess.run(  # noqa: S603, S607
-        ["git", "commit", f"--message={message}"], check=True
+        ["git", "commit", "--quiet", f"--message={message}"], check=True
     )
 
 
