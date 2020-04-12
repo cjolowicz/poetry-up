@@ -19,6 +19,7 @@ and performs the following actions for every reported package:
 
     1. Switch to a new branch ``poetry-up/<package>-<version>``.
     2. Update the dependency with ``poetry update``.
+       For incompatible updates, also update ``pyproject.toml``.
     3. Commit the changes to pyproject.toml and poetry.lock.
     4. Push to origin (optional).
     5. Open a pull request or merge request (optional).
