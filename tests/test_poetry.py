@@ -90,40 +90,6 @@ class TestShowOutdated:
         assert not list(poetry.show_outdated())
 
 
-class TestUpdate:
-    """Tests for update."""
-
-    @pytest.mark.parametrize("lock", [False, True])
-    def test_it_runs_subprocess(
-        self, monkeypatch: MonkeyPatch, package: poetry.Package, lock: bool
-    ) -> None:
-        """It runs a subprocess."""
-        stub = pretend.call_recorder(lambda *args, **kwargs: None)
-
-        monkeypatch.setattr("subprocess.run", stub)
-        poetry.update(package, lock=lock)
-
-        assert stub.calls
-
-    def test_it_updates_version_constraints(
-        self, monkeypatch: MonkeyPatch, repository: Path, package: poetry.Package
-    ) -> None:
-        """It updates version constraints in pyproject.toml if required."""
-        monkeypatch.setattr("subprocess.run", lambda *args, **kwargs: None)
-
-        package.compatible = False
-        poetry.update(package)
-
-        config = Path("pyproject.toml")
-
-        with config.open() as io:
-            contents = io.read()
-
-        document = tomlkit.loads(contents)
-        constraint = document["tool"]["poetry"]["dependencies"]["marshmallow"]
-        assert constraint == f"^{package.new_version}"
-
-
 class TestUpdateConstraint:
     """Tests for update_constraint."""
 
@@ -143,3 +109,42 @@ class TestUpdateConstraint:
         poetry.update_constraint(package, dependencies)
 
         assert dependencies["marshmallow"]["version"] == f"^{package.new_version}"
+
+
+class TestUpdatePyProjectTOML:
+    """Tests for update_pyproject_toml."""
+
+    def test_it_updates_version_constraints(
+        self, repository: Path, package: poetry.Package
+    ) -> None:
+        """It updates version constraints in pyproject.toml."""
+        poetry.update_pyproject_toml(package)
+
+        config = Path("pyproject.toml")
+        with config.open() as io:
+            contents = io.read()
+
+        document = tomlkit.loads(contents)
+        constraint = document["tool"]["poetry"]["dependencies"]["marshmallow"]
+        assert constraint == f"^{package.new_version}"
+
+
+class TestUpdate:
+    """Tests for update."""
+
+    @pytest.mark.parametrize("compatible", [True, False])
+    def test_update_invokes_installer(
+        self,
+        monkeypatch: MonkeyPatch,
+        repository: Path,
+        package: poetry.Package,
+        compatible: bool,
+    ) -> None:
+        """It invokes Installer.run."""
+        stub = pretend.call_recorder(lambda self: None)
+        monkeypatch.setattr("poetry.installation.installer.Installer.run", stub)
+
+        package.compatible = compatible
+        poetry.update(package)
+
+        assert stub.calls

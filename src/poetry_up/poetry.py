@@ -1,16 +1,17 @@
 """Poetry wrapper."""
 from dataclasses import dataclass
 from pathlib import Path
-import subprocess  # noqa: S404
 import sys
 from typing import Iterator
 
 from poetry.factory import Factory
+from poetry.installation import Installer
 from poetry.io.null_io import NullIO
 from poetry.packages import Package as Package_
 from poetry.poetry import Poetry
 from poetry.puzzle.provider import Provider
 from poetry.semver import parse_constraint
+from poetry.utils.env import EnvManager
 from poetry.version.version_selector import VersionSelector
 import tomlkit  # noqa: E402
 import tomlkit.api  # noqa: E402
@@ -117,11 +118,14 @@ def update(package: Package, lock: bool = False) -> None:
     if not package.compatible:
         update_pyproject_toml(package)
 
-    if lock:
-        subprocess.run(  # noqa: S603, S607
-            ["poetry", "update", "--lock", package.name], check=True
-        )
-    else:
-        subprocess.run(  # noqa: S603, S607
-            ["poetry", "update", package.name], check=True
-        )
+    poetry = Factory().create_poetry(Path.cwd())
+    env_manager = EnvManager(poetry)
+    io = NullIO()
+    env = env_manager.create_venv(io)
+
+    installer = Installer(io, env, poetry.package, poetry.locker, poetry.pool)
+    installer.whitelist({package.name: "*"})
+    installer.dev_mode(True)
+    installer.execute_operations(not lock)
+    installer.update(True)
+    installer.run()
