@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "poetry-up"
-version = "0.2.0"
+version = "0.3.0"
 description = "Upgrade dependencies using Poetry"
 authors = ["Claudio Jolowicz <mail@claudiojolowicz.com>"]
 license = "MIT"
