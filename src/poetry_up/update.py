@@ -83,7 +83,7 @@ class Commit(Action):
     def __call__(self) -> None:
         """Run the action."""
         git.add(["pyproject.toml", "poetry.lock"])
-        git.commit(message=f"{self.updater.title}\n\n{self.updater.description}\n")
+        git.commit(message=f"{self.updater.title}\n")
 
 
 class Rollback(Action):
@@ -181,11 +181,10 @@ class PackageUpdater:
         self.original_branch = original_branch
 
         self.branch = f"{program_name}/{package.name}-{package.new_version}"
-        self.title = f"Upgrade to {package.name} {package.new_version}"
-        self.description = (
-            f"Upgrade {package.name} from {package.old_version}"
-            f" to {package.new_version}"
+        self.title = (
+            f"Bump {package.name} from {package.old_version} to {package.new_version}"
         )
+        self.description = self.title
 
         self.actions = Actions.create(self)
 
