@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "poetry-up"
 version = "0.2.0"
-description = "Poetry Up"
+description = "Upgrade dependencies using Poetry"
 authors = ["Claudio Jolowicz <mail@claudiojolowicz.com>"]
 license = "MIT"
 readme = "README.md"
