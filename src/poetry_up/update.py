@@ -14,6 +14,7 @@ program_name = "poetry-up"
 class Options:
     """Options for the update operation."""
 
+    latest: bool
     install: bool
     commit: bool
     push: bool
@@ -67,7 +68,11 @@ class Update(Action):
 
     def __call__(self) -> None:
         """Run the action."""
-        poetry.update(self.updater.package, lock=not self.updater.options.install)
+        poetry.update(
+            self.updater.package.name,
+            lock=not self.updater.options.install,
+            latest=self.updater.options.latest,
+        )
 
 
 class Commit(Action):
@@ -218,10 +223,7 @@ class PackageUpdater:
         message = "{}: {} → {}".format(
             click.style(self.package.name, fg="bright_green"),
             click.style(self.package.old_version, fg="blue"),
-            click.style(
-                self.package.new_version,
-                fg="red" if self.package.compatible else "yellow",
-            ),
+            click.style(self.package.new_version, fg="yellow"),
         )
         click.echo(message)
 

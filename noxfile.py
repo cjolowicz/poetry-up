@@ -43,6 +43,7 @@ class Poetry:
                 *args,
                 "--format=requirements.txt",
                 f"--output={requirements.name}",
+                "--without-hashes",
                 external=True,
             )
             yield requirements.name
@@ -142,7 +143,7 @@ def safety(session: Session) -> None:
     poetry = Poetry(session)
     with poetry.export("--dev", "--without-hashes") as requirements:
         install(session, "safety")
-        session.run("safety", "check", f"--file={requirements}", "--bare")
+        session.run("safety", "check", f"--file={requirements}")
 
 
 @nox.session(python=python_versions)

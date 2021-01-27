@@ -31,8 +31,8 @@ def stub_poetry_update(
 ) -> None:
     """Stub for poetry.update."""
 
-    def stub(package: poetry.Package, lock: bool = False) -> None:
-        if package.name == "marshmallow":
+    def stub(package: str, lock: bool = False, latest: bool = False) -> None:
+        if package == "marshmallow":
             source = shared_datadir / "poetry.lock.new"
             destination = Path("poetry.lock")
             destination.write_text(source.read_text())
@@ -44,7 +44,7 @@ def stub_poetry_update(
 def stub_poetry_update_noop(monkeypatch: MonkeyPatch) -> None:
     """Stub for poetry.update which does nothing."""
 
-    def stub(package: str, lock: bool = False) -> None:
+    def stub(package: str, lock: bool = False, latest: bool = False) -> None:
         pass
 
     monkeypatch.setattr("poetry_up.poetry.update", stub)

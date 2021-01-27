@@ -34,6 +34,7 @@ def repository(shared_datadir: Path, tmp_path: Path) -> Iterator[Path]:
 
     commands = [
         ["git", "init"],
+        ["git", "switch", "--create", "master"],
         ["git", "add", "."],
         ["git", "commit", "--message=Initial import"],
     ]

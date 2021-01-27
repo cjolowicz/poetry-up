@@ -9,6 +9,12 @@ from . import __version__, update
 
 @click.command()  # noqa: C901
 @click.option(
+    "--latest/--no-latest",
+    help="Upgrade the version constraint if required.",
+    default=True,
+    show_default=True,
+)
+@click.option(
     "--install/--no-install",
     help="Install dependency into virtual environment.",
     default=True,
@@ -50,6 +56,7 @@ from . import __version__, update
 @click.argument("packages", nargs=-1)
 @click.version_option(version=__version__)
 def main(  # noqa: C901
+    latest: bool,
     install: bool,
     commit: bool,
     push: bool,
@@ -66,6 +73,7 @@ def main(  # noqa: C901
         os.chdir(cwd)
 
     options = update.Options(
+        latest,
         install,
         commit,
         push,
