@@ -1,0 +1,17 @@
+{
+    "template": "https://github.com/cjolowicz/cookiecutter-hypermodern-python",
+    "commit": "b39c081426245e0bd4d41c9ae993df064586e603",
+    "context": {
+        "cookiecutter": {
+            "project_name": "poetry-up",
+            "package_name": "poetry_up",
+            "friendly_name": "poetry-up",
+            "author": "Claudio Jolowicz",
+            "email": "mail@claudiojolowicz.com",
+            "github_user": "cjolowicz",
+            "version": "0.4.0",
+            "_template": "https://github.com/cjolowicz/cookiecutter-hypermodern-python"
+        }
+    },
+    "directory": null
+}
