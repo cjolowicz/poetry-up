@@ -15,6 +15,7 @@ Changelog = "https://github.com/cjolowicz/poetry-up/releases"
 [tool.poetry.dependencies]
 python = "^3.8"
 click = "^7.0"
+tomlkit = "^0.7.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.3.2"

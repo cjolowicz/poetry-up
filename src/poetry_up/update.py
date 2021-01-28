@@ -69,7 +69,7 @@ class Update(Action):
     def __call__(self) -> None:
         """Run the action."""
         poetry.update(
-            self.updater.package.name,
+            self.updater.package,
             lock=not self.updater.options.install,
             latest=self.updater.options.latest,
         )

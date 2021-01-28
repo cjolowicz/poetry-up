@@ -31,8 +31,8 @@ def stub_poetry_update(
 ) -> None:
     """Stub for poetry.update."""
 
-    def stub(package: str, lock: bool = False, latest: bool = False) -> None:
-        if package == "marshmallow":
+    def stub(package: poetry.Package, lock: bool = False, latest: bool = False) -> None:
+        if package.name == "marshmallow":
             source = shared_datadir / "poetry.lock.new"
             destination = Path("poetry.lock")
             destination.write_text(source.read_text())
@@ -44,7 +44,7 @@ def stub_poetry_update(
 def stub_poetry_update_noop(monkeypatch: MonkeyPatch) -> None:
     """Stub for poetry.update which does nothing."""
 
-    def stub(package: str, lock: bool = False, latest: bool = False) -> None:
+    def stub(package: poetry.Package, lock: bool = False, latest: bool = False) -> None:
         pass
 
     monkeypatch.setattr("poetry_up.poetry.update", stub)
@@ -131,7 +131,7 @@ class TestMain:
         stub_poetry_update: None,
     ) -> None:
         """It creates a branch for the upgrade."""
-        runner.invoke(console.main)
+        runner.invoke(console.main, catch_exceptions=False)
         assert git.branch_exists("poetry-up/marshmallow-3.5.1")
 
     def test_it_removes_branch_on_refused_upgrade(
@@ -142,5 +142,5 @@ class TestMain:
         stub_poetry_update_noop: None,
     ) -> None:
         """It removes the branch if the upgrade was refused."""
-        runner.invoke(console.main)
+        runner.invoke(console.main, catch_exceptions=False)
         assert not git.branch_exists("poetry-up/marshmallow-3.5.1")
